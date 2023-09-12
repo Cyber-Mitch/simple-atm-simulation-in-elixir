@@ -1,73 +1,30 @@
 # Define a struct to represent an ATM
 ExUnit.start()
 defmodule ATM do
-  @moduledoc """
-  A module that simulates an ATM machine.
-  """
 
   @type t :: %__MODULE__{balance: non_neg_integer(), pin: String.t()}
   defstruct balance: 0, pin: "1234"
 
   @pin "1234"
-  @doc """
-  Withdraws money from an ATM.
 
-  ## Examples
+ @spec withdraw(t(), non_neg_integer(), String.t()) :: {:ok, t(), non_neg_integer()} | {:error, String.t()}
 
-      iex> atm = %ATM{balance: 1000}
-      iex> {:ok, atm, cash} = ATM.withdraw(atm, 500, "1234")
-      iex> cash
-      500
-      iex> atm.balance
-      500
+  def withdraw(%__MODULE__{balance: balance, pin: @pin}, amount, @pin)
+  when amount > 0 and amount <= balance do
+  new_balance = balance - amount
+  new_atm = %__MODULE__{balance: new_balance, pin: @pin}
+  {:ok, new_atm, amount}
+  end
 
-      iex> atm = %ATM{balance: 1000}
-      iex> {:error, message} = ATM.withdraw(atm, 600, "1234")
-      iex> message
-      "Insufficient balance"
+  def withdraw(%__MODULE__{balance: balance, pin: _}, amount, @pin) when amount > balance do
+    {:error, "Insufficient balance"}
+  end
 
-      iex> atm = %ATM{balance: 1000}
-      iex> {:error, message} = ATM.withdraw(atm, 100, "4321")
-      iex> message
-      "Wrong pin"
-  """
- @spec withdraw(t(), non_neg_integer(), String.t()) ::
- {:ok, t(), non_neg_integer()} | {:error, String.t()}
-def withdraw(%__MODULE__{balance: balance, pin: @pin}, amount, @pin)
-when amount > 0 and amount <= balance do
-new_balance = balance - amount
-new_atm = %__MODULE__{balance: new_balance, pin: @pin}
-{:ok, new_atm, amount}
-end
+  def withdraw(%__MODULE__{pin: _}, _, _) do
+  {:error, "Incorrect Pin"}
+  end
 
-def withdraw(%__MODULE__{balance: balance, pin: _}, amount, @pin) when amount > balance do
-  {:error, "Insufficient balance"}
-end
-
-def withdraw(%__MODULE__{pin: _}, _, _) do
-{:error, "Incorrect Pin"}
-end
-  @doc """
-  Deposits money to an ATM.
-
-  ## Examples
-
-      iex> atm = %ATM{balance: 1000}
-      iex> {:ok, atm} = ATM.deposit(atm, 200, "1234")
-      iex> atm.balance
-      1200
-
-      iex> atm = %ATM{balance: 1000}
-      iex> {:error, message} = ATM.deposit(atm, -50, "1234")
-      iex> message
-      "Invalid amount"
-
-      iex> atm = %ATM{balance: 1000}
-      iex> {:error, message} = ATM.deposit(atm, 100, "4321")
-      iex> message
-      "Wrong pin"
-  """
-  @spec deposit(t(), non_neg_integer(), String.t()) :: {:ok, t()} | {:error, String.t()}
+@spec deposit(t(), non_neg_integer(), String.t()) :: {:ok, t()} | {:error, String.t()}
   def deposit(%__MODULE__{balance: balance, pin: @pin}, amount, @pin) when amount > 0 do
     new_atm = %__MODULE__{balance: balance + amount, pin: @pin}
     {:ok, new_atm}
@@ -106,7 +63,5 @@ defmodule ATMTest do
     assert new_atm.balance == 100000000000 - cash
   end
 
-  # Add similar tests for deposit function
-end
 
-# Run the tests within the same file
+end
